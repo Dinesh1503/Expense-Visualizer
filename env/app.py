@@ -9,7 +9,7 @@ app = Flask(__name__)
  
 app.secret_key = "caircocoders-ednalan"
  
-UPLOAD_FOLDER = 'static/uploads'
+UPLOAD_FOLDER = r'env\static\uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
  
@@ -18,9 +18,9 @@ ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def delete_file(filename):
-    if os.path.exists(UPLOAD_FOLDER + "/" + filename):
-        os.remove(UPLOAD_FOLDER + "/" + filename)
+def delete_file(filepath):
+    if os.path.exists(filepath):
+        os.remove(filepath)
         return True
     else:
         print("The file does not exist") 
@@ -99,21 +99,17 @@ def start(file_path):
     print(val_index)
     print(val_index,text[val_index])
     value = text[val_index]
-    new_value = ""
-    for i in range(len(value)):
-        if(value[i] == "," and i == len(value)-3):
-            new_value += "."
-        else:
-            new_value += value[i]
-    print(new_value)
-    return new_value
-
-# print(text)
-# index = find_pos_total(text)
-# val_index = find_value(index,cords)
-# print(val_index,text[val_index])
-# value = text[val_index]
-# value = "3,00.00"
+    if(re.search("^\d",value) == None):
+        return "Error"
+    else:
+        new_value = ""
+        for i in range(len(value)):
+            if(value[i] == "," and i == len(value)-3):
+                new_value += "."
+            else:
+                new_value += value[i]
+        print(new_value)
+        return new_value
 
 
 
@@ -146,13 +142,7 @@ def upload_file():
 
             total_amt = start(file_path)
             all_values.append(total_amt)
-            # reader = easyocr.Reader(["en"])
-            # fn = str('static/uploads/' + filename)
-            # results = reader.readtext(fn)
-            # print(type(results))
-            # x = json.dumps(results)
-            # print(type(x))
-            # return x
+
         else:
             errors[file.filename] = 'File type is not allowed'
 
@@ -162,8 +152,6 @@ def upload_file():
         resp.status_code = 500
         return json.dumps(all_values)
     if success:
-        resp = jsonify({'message' : 'Files successfully uploaded'})
-        resp.status_code = 201
         return json.dumps(all_values)
     else:
         resp = jsonify(errors)
