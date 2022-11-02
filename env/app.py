@@ -142,17 +142,21 @@ def upload_file():
 
             total_amt = start(file_path)
             all_values.append(total_amt)
-
+            delete_file(file_path)
+            
         else:
             errors[file.filename] = 'File type is not allowed'
+
+    if success:
+        
+        return json.dumps(all_values)
 
     if success and errors:
         errors['message'] = 'File(s) successfully uploaded'
         resp = jsonify(errors)
         resp.status_code = 500
         return json.dumps(all_values)
-    if success:
-        return json.dumps(all_values)
+    
     else:
         resp = jsonify(errors)
         resp.status_code = 500
